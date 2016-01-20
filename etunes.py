@@ -1,4 +1,7 @@
 '''
+This application requires installation of timidity (from apt-get)
+and pyknon (sudo pip install pyknon)
+
 to convert to mp3
 timidity -Or -o - first_succesful_tune.mid | lame -r - first_succesful_tune.mp3
 
@@ -7,6 +10,7 @@ timidity -Or -o - first_succesful_tune.mid | lame -r - first_succesful_tune.mp3
 from pyknon.genmidi import Midi
 from pyknon.music import NoteSeq
 
+import sys
 import random
 import os
 import subprocess as sub
@@ -23,11 +27,16 @@ notesPoolRest = ['R16', 'R32']
 
 notesPoolA = notesPoolSixteenth + notesPoolThirtySecond + notesPoolRest
 
+# change NUMBER_OF_NOTES to 16 or 8
 NUMBER_OF_NOTES = 8
 NUMBER_OF_TUNES = 6
 
 # tunes contains NoteSeq objects
 tunes = []
+
+experimentName = sys.argv[1]
+generationCount = 0
+ins = 0
 
 # defining a class tune which represents an individual in the population
 class Tune:
@@ -59,15 +68,28 @@ def randomTune():
 		noteString += random.choice(notesPoolA) + " "
 
 	return NoteSeq(noteString)
-cd 
-# takes a NoteSeq object as parameter
-def generateMid(tune):
-	midi = Midi()
-	midi.seq_notes(tune.notes)
-	midi.write("midi/tune.mid")
 
-def playMid():
-	sub.Popen(['timidity', 'midi/tune.mid'], stdout=sub.PIPE, stderr=sub.PIPE)
+# takes a NoteSeq object as parameter
+def generateMid(tune, tuneNum, lastTune = False):
+
+	global generationCount
+	global ins
+
+	midi = Midi(instrument = ins)
+	midi.seq_notes(tune.notes)
+
+	path = "midi/"+ experimentName +"/gen"+ str(generationCount) +"/"
+
+	if not os.path.exists(path):
+		os.makedirs(path)
+
+	if lastTune:
+		midi.write("midi/"+ experimentName +"/gen"+ str(generationCount) +"/*tune"+ str(tuneNum) +"*.mid")
+	else:
+		midi.write(path + "tune"+ str(tuneNum) +".mid")
+
+def playMid(tuneNum):
+	sub.Popen(['timidity', "midi/"+ experimentName +"/gen"+ str(generationCount) +"/tune"+ str(tuneNum) +".mid"], stdout=sub.PIPE, stderr=sub.PIPE)
 
 def showAllTunes():
 	print '\n\tNOTES'.ljust(int(NUMBER_OF_NOTES * 8)) + 'SCORE'
@@ -77,36 +99,41 @@ def showAllTunes():
 
 def input():
 
-		
+		global generationCount
+		global ins
 
 		showAllTunes()
 
 		while True:
 			print '~~>>',
 			command = raw_input()
-
 			match = re.search(r'(\w*) ?(\d*) ?(\d*)', command)
-			if match.group(1) == 'play':
+
+			if match.group(1) == 'play' or match.group(1) == 'p':
 				tuneNumber = int(match.group(2)) - 1
-				generateMid(tunes[tuneNumber])
-				playMid()
+				generateMid(tunes[tuneNumber], tuneNumber)
+				playMid(tuneNumber)
 				showAllTunes()
 
-			if match.group(1) == 'score':
+			if match.group(1) == 'score' or match.group(1) == 's':
 				print 'scoring...'
 				time.sleep(0.5)
 				tuneNumber, score = int(match.group(2)) - 1, int(match.group(3))
 				tunes[tuneNumber].score = score
 				showAllTunes()
 
-			if match.group(1) == 'done':
+			if match.group(1) == 'instrument' or match.group(1) == 'i':
+				ins = int(match.group(2))
+
+			if match.group(1) == 'done' or match.group(1) == 'd':
+				generationCount += 1
 				return True	
 
-			if match.group(1) == 'choose':
+			if match.group(1) == 'choose' or match.group(1) == 'c':
 				tuneNumber = int(match.group(2)) - 1
-				generateMid(tunes[tuneNumber])
-				playMid()
-				print 'Well, Okay then. Enjoy your eTune.'
+				generateMid(tunes[tuneNumber], tuneNumber, True)
+				playMid(tuneNumber)
+				print 'Well, Okay then. Enjoy your eTune! :D'
 				time.sleep(0.5)
 				return False
 
@@ -115,6 +142,7 @@ def main():
 	for i in range(NUMBER_OF_TUNES):
 		tunes.append(Tune())
 
+	
 	os.system('clear')
 	print '~~~eTunes~~~'
 	time.sleep(0.5)
