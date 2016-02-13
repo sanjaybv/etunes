@@ -9,9 +9,10 @@ Clone the repository into your local machine. (git clone https://github.com/sanj
 To run the program type in "python etunes.py <some-name>".
 
 The CLI options are
-play <tune-number>            - Plays the tune
-score <tune-number> <score>   - Scores the tune number (feel free to use your own scale of scoring)
-done                          - Moves to the next generation (selection, cross-over and mutation)
-choose <tune-number>          - Selects this tune as your final tune and quits the program
+
+1. play \<tune-number\>            - Plays the tune
+2. score \<tune-number\> \<score\>   - Scores the tune number (feel free to use your own scale of scoring)
+3. done                          - Moves to the next generation (selection, cross-over and mutation)
+4. choose \<tune-number\>          - Selects this tune as your final tune and quits the program
 
 The final tunes are stored in the "midi" folder.
