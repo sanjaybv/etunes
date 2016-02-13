@@ -6,7 +6,7 @@ To run this program, please install timidity (from apt-get) and pyknon (sudo pip
 Clone the repository into your local machine. (git clone https://github.com/sanjaybv/etunes.git)
 
 ## Running
-To run the program type in "python etunes.py <some-name>".
+To run the program type in "python etunes.py \<name-of-your-tune\>".
 
 The CLI options are
 
