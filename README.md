@@ -1,5 +1,5 @@
 # etunes
-Music composition using genetic Algorithms.
+Music composition using Genetic Algorithms.
 
 ## Installation
 To run this program, please install timidity (from apt-get) and pyknon (sudo pip install pyknon) first.
