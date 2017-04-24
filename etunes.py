@@ -41,150 +41,150 @@ ins = 0
 # defining a class tune which represents an individual in the population
 class Tune:
 
-	# constructor
-	def __init__(self):
-		self.notes = randomTune()
-		self.score = 1
+    # constructor
+    def __init__(self):
+        self.notes = randomTune()
+        self.score = 1
 
-	def crossover(self, b):
-		child = Tune()
-		midpoint = random.randrange(len(self.notes))
-		child.notes = self.notes[:midpoint] + b.notes[midpoint:]
-		return child
+    def crossover(self, b):
+        child = Tune()
+        midpoint = random.randrange(len(self.notes))
+        child.notes = self.notes[:midpoint] + b.notes[midpoint:]
+        return child
 
-	def mutate(self, mutationRate = 0.01):
-		for i in range(len(self.notes)):
-			if random.random() < mutationRate:
-				self.notes = self.notes[:i] + NoteSeq(random.choice(notesPoolA)) + self.notes[i + 1:]
+    def mutate(self, mutationRate = 0.01):
+        for i in range(len(self.notes)):
+            if random.random() < mutationRate:
+                self.notes = self.notes[:i] + NoteSeq(random.choice(notesPoolA)) + self.notes[i + 1:]
 
-	def displayNotes(self):
-		print "\t%s%s" % (str(self.notes).ljust(int(NUMBER_OF_NOTES * 8)), self.score)
+    def displayNotes(self):
+        print "\t%s%s" % (str(self.notes).ljust(int(NUMBER_OF_NOTES * 8)), self.score)
 
 
 def randomTune():
-	# creating a string of random notes from the pool
-	noteString = ''
-	for _ in range(NUMBER_OF_NOTES):
-		noteString += random.choice(notesPoolA) + " "
+    # creating a string of random notes from the pool
+    noteString = ''
+    for _ in range(NUMBER_OF_NOTES):
+        noteString += random.choice(notesPoolA) + " "
 
-	return NoteSeq(noteString)
+    return NoteSeq(noteString)
 
 # takes a NoteSeq object as parameter
 def generateMid(tune, tuneNum, lastTune = False):
 
-	global generationCount
-	global ins
+    global generationCount
+    global ins
 
-	midi = Midi(instrument = ins)
-	midi.seq_notes(tune.notes)
+    midi = Midi(instrument = ins)
+    midi.seq_notes(tune.notes)
 
-	path = "midi/"+ experimentName +"/gen"+ str(generationCount) +"/"
+    path = "midi/"+ experimentName +"/gen"+ str(generationCount) +"/"
 
-	if not os.path.exists(path):
-		os.makedirs(path)
+    if not os.path.exists(path):
+        os.makedirs(path)
 
-	if lastTune:
-		midi.write("midi/"+ experimentName +"/gen"+ str(generationCount) +"/*tune"+ str(tuneNum) +"*.mid")
-	else:
-		midi.write(path + "tune"+ str(tuneNum) +".mid")
+    if lastTune:
+        midi.write("midi/"+ experimentName +"/gen"+ str(generationCount) +"/*tune"+ str(tuneNum) +"*.mid")
+    else:
+        midi.write(path + "tune"+ str(tuneNum) +".mid")
 
 def playMid(tuneNum):
-	sub.Popen(['timidity', "midi/"+ experimentName +"/gen"+ str(generationCount) +"/tune"+ str(tuneNum) +".mid"], stdout=sub.PIPE, stderr=sub.PIPE)
+    sub.Popen(['timidity', "midi/"+ experimentName +"/gen"+ str(generationCount) +"/tune"+ str(tuneNum) +".mid"], stdout=sub.PIPE, stderr=sub.PIPE)
 
 def showAllTunes():
-	print '\n\tNOTES'.ljust(int(NUMBER_OF_NOTES * 8)) + 'SCORE'
-	for i in tunes:
-			i.displayNotes()
-	print
+    print '\n\tNOTES'.ljust(int(NUMBER_OF_NOTES * 8)) + 'SCORE'
+    for i in tunes:
+            i.displayNotes()
+    print
 
 def input():
 
-		global generationCount
-		global ins
+        global generationCount
+        global ins
 
-		showAllTunes()
+        showAllTunes()
 
-		while True:
-			print '~~>>',
-			command = raw_input()
-			match = re.search(r'(\w*) ?(\d*) ?(\d*)', command)
+        while True:
+            print '~~>>',
+            command = raw_input()
+            match = re.search(r'(\w*) ?(\d*) ?(\d*)', command)
 
-			if match.group(1) == 'play' or match.group(1) == 'p':
-				tuneNumber = int(match.group(2)) - 1
-				generateMid(tunes[tuneNumber], tuneNumber)
-				playMid(tuneNumber)
-				showAllTunes()
+            if match.group(1) == 'play' or match.group(1) == 'p':
+                tuneNumber = int(match.group(2)) - 1
+                generateMid(tunes[tuneNumber], tuneNumber)
+                playMid(tuneNumber)
+                showAllTunes()
 
-			if match.group(1) == 'score' or match.group(1) == 's':
-				print 'scoring...'
-				time.sleep(0.5)
-				tuneNumber, score = int(match.group(2)) - 1, int(match.group(3))
-				tunes[tuneNumber].score = score
-				showAllTunes()
+            if match.group(1) == 'score' or match.group(1) == 's':
+                print 'scoring...'
+                time.sleep(0.5)
+                tuneNumber, score = int(match.group(2)) - 1, int(match.group(3))
+                tunes[tuneNumber].score = score
+                showAllTunes()
 
-			if match.group(1) == 'instrument' or match.group(1) == 'i':
-				ins = int(match.group(2))
+            if match.group(1) == 'instrument' or match.group(1) == 'i':
+                ins = int(match.group(2))
 
-			if match.group(1) == 'done' or match.group(1) == 'd':
-				generationCount += 1
-				return True	
+            if match.group(1) == 'done' or match.group(1) == 'd':
+                generationCount += 1
+                return True 
 
-			if match.group(1) == 'choose' or match.group(1) == 'c':
-				tuneNumber = int(match.group(2)) - 1
-				generateMid(tunes[tuneNumber], tuneNumber, True)
-				playMid(tuneNumber)
-				print 'Well, Okay then. Enjoy your eTune! :D'
-				time.sleep(0.5)
-				return False
+            if match.group(1) == 'choose' or match.group(1) == 'c':
+                tuneNumber = int(match.group(2)) - 1
+                generateMid(tunes[tuneNumber], tuneNumber, True)
+                playMid(tuneNumber)
+                print 'Well, Okay then. Enjoy your eTune! :D'
+                time.sleep(0.5)
+                return False
 
 def main():
-	
-	for i in range(NUMBER_OF_TUNES):
-		tunes.append(Tune())
+    
+    for i in range(NUMBER_OF_TUNES):
+        tunes.append(Tune())
 
-	
-	os.system('clear')
-	print '~~~eTunes~~~'
-	time.sleep(0.5)
-	print 'Hi! Welcome to eTunes.'
-	time.sleep(0.5)
-	print 'We will be using', NUMBER_OF_TUNES, 'tunes',
-	print 'with each having', NUMBER_OF_NOTES, 'notes.'
-	time.sleep(0.5)
-	print '\nThe contents of the music pool is shown below.'
+    
+    os.system('clear')
+    print '~~~eTunes~~~'
+    time.sleep(0.5)
+    print 'Hi! Welcome to eTunes.'
+    time.sleep(0.5)
+    print 'We will be using', NUMBER_OF_TUNES, 'tunes',
+    print 'with each having', NUMBER_OF_NOTES, 'notes.'
+    time.sleep(0.5)
+    print '\nThe contents of the music pool is shown below.'
 
 
-	flag = input()
+    flag = input()
 
-	while flag:
+    while flag:
 
-		print 'mating tunes...'
-		time.sleep(0.5)
-		print 'mutating tunelings...'
-		time.sleep(0.5)
-		print 'done...'
-		time.sleep(1)
+        print 'mating tunes...'
+        time.sleep(0.5)
+        print 'mutating tunelings...'
+        time.sleep(0.5)
+        print 'done...'
+        time.sleep(1)
 
-		matingPool = []
-		for i in range(NUMBER_OF_TUNES):
-			for j in range(tunes[i].score):
-				matingPool.append(tunes[i])
+        matingPool = []
+        for i in range(NUMBER_OF_TUNES):
+            for j in range(tunes[i].score):
+                matingPool.append(tunes[i])
 
-		for i in range(NUMBER_OF_TUNES):
-			a, b = random.sample(matingPool, 2)
+        for i in range(NUMBER_OF_TUNES):
+            a, b = random.sample(matingPool, 2)
 
-			# todo: receive two children from crossover
-			child = a.crossover(b)
-			child.mutate()
-			tunes[i] = child
+            # todo: receive two children from crossover
+            child = a.crossover(b)
+            child.mutate()
+            tunes[i] = child
 
-		while True:
-			try:
-				flag = input()
-				break
-			except IndexError:
-				print
-			except:
-				print 'Oops! You must\'ve typed something wrong. Why don\'t you try again.'
+        while True:
+            try:
+                flag = input()
+                break
+            except IndexError:
+                print
+            except:
+                print 'Oops! You must\'ve typed something wrong. Why don\'t you try again.'
 
 main()
